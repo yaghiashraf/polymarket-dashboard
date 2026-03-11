@@ -1,5 +1,7 @@
+'use server';
+
 export async function getMarket(slug: string) {
-  const res = await fetch(`https://gamma-api.polymarket.com/markets?slug=${slug}&limit=1`);
+  const res = await fetch(`https://gamma-api.polymarket.com/markets?slug=${slug}&limit=1`, { cache: 'no-store' });
   if (!res.ok) {
     throw new Error('Failed to fetch market data');
   }
@@ -8,10 +10,9 @@ export async function getMarket(slug: string) {
 }
 
 export async function getCandles(tokenId: string) {
-  const res = await fetch(`https://clob.polymarket.com/prices-history?market=${tokenId}&interval=5m`);
+  const res = await fetch(`https://clob.polymarket.com/prices-history?market=${tokenId}&interval=5m`, { cache: 'no-store' });
   if (!res.ok) {
-     // fallback to data-api if clob doesn't work, though clob is the standard for prices-history
-    const fallbackRes = await fetch(`https://data-api.polymarket.com/v1/candles?token=${tokenId}&window=1d&interval=5m`);
+    const fallbackRes = await fetch(`https://data-api.polymarket.com/v1/candles?token=${tokenId}&window=1d&interval=5m`, { cache: 'no-store' });
     if (!fallbackRes.ok) throw new Error('Failed to fetch candles');
     return fallbackRes.json();
   }
@@ -19,10 +20,9 @@ export async function getCandles(tokenId: string) {
 }
 
 export async function getRecentTrades(tokenId: string) {
-  const res = await fetch(`https://clob.polymarket.com/trades?market=${tokenId}`);
+  const res = await fetch(`https://clob.polymarket.com/trades?market=${tokenId}`, { cache: 'no-store' });
   if (!res.ok) {
-     // fallback to v1 trades
-    const fallbackRes = await fetch(`https://data-api.polymarket.com/v1/trades?market=${tokenId}`);
+    const fallbackRes = await fetch(`https://data-api.polymarket.com/v1/trades?market=${tokenId}`, { cache: 'no-store' });
     if (!fallbackRes.ok) throw new Error('Failed to fetch trades');
     return fallbackRes.json();
   }

@@ -11,7 +11,7 @@ export default function DashboardPage() {
   const [slug, setSlug] = useState(
     typeof window !== 'undefined' && process.env.NEXT_PUBLIC_POLYMARKET_SLUG 
       ? process.env.NEXT_PUBLIC_POLYMARKET_SLUG 
-      : 'will-trump-win-the-2024-election'
+      : 'will-joe-biden-get-coronavirus-before-the-election'
   );
 
   const fetcher = async () => {
