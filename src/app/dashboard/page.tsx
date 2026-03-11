@@ -18,10 +18,16 @@ export default function DashboardPage() {
     const market = await getMarket(slug);
     if (!market) throw new Error('Market not found');
     
-    // Find the Yes token
-    const yesToken = market.tokens?.find((t: any) => t.outcome === 'Yes');
-    if (!yesToken) throw new Error('Yes token not found in market');
-    const yesTokenId = yesToken.token_id;
+    // Parse the stringified arrays
+    const outcomes = JSON.parse(market.outcomes || '[]');
+    const tokenIds = JSON.parse(market.clobTokenIds || '[]');
+    const prices = JSON.parse(market.outcomePrices || '[]');
+
+    const yesIndex = outcomes.indexOf('Yes');
+    if (yesIndex === -1) throw new Error('Yes token not found in market');
+    
+    const yesTokenId = tokenIds[yesIndex];
+    market.yesPrice = parseFloat(prices[yesIndex] || '0');
     
     // Fetch candles and trades
     let candles: any = [];
@@ -47,7 +53,7 @@ export default function DashboardPage() {
   if (isLoading || !data) return <div className="p-8 min-h-screen bg-gray-50">Loading dashboard...</div>;
 
   const { market, candles, trades } = data;
-  const yesTokenPrice = market.tokens?.find((t: any) => t.outcome === 'Yes')?.price || 0;
+  const yesTokenPrice = market.yesPrice || 0;
 
   // Process data for charts
   const history = Array.isArray(candles) ? candles : (candles?.history || []);
