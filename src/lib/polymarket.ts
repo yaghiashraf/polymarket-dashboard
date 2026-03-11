@@ -1,12 +1,30 @@
 'use server';
 
 export async function getMarket(slug: string) {
-  const res = await fetch(`https://gamma-api.polymarket.com/markets?slug=${slug}&limit=1`, { cache: 'no-store' });
-  if (!res.ok) {
-    throw new Error('Failed to fetch market data');
+  // First try to fetch as a single market
+  let res = await fetch(`https://gamma-api.polymarket.com/markets?slug=${slug}&limit=1`, { cache: 'no-store' });
+  let data = await res.json();
+  
+  if (data && data.length > 0) {
+    return data[0];
   }
-  const data = await res.json();
-  return data[0];
+
+  // If not found, try to fetch as an event and return the most prominent market
+  res = await fetch(`https://gamma-api.polymarket.com/events?slug=${slug}&limit=1`, { cache: 'no-store' });
+  data = await res.json();
+
+  if (data && data.length > 0 && data[0].markets && data[0].markets.length > 0) {
+    // Return the first active market from the event, or just the first market
+    const activeMarket = data[0].markets.find((m: any) => m.active && !m.closed) || data[0].markets[0];
+    
+    // Some event API markets lack the parent title, so we append it for clarity
+    if (activeMarket) {
+        activeMarket.title = activeMarket.question || data[0].title;
+    }
+    return activeMarket;
+  }
+
+  throw new Error('Market or Event not found');
 }
 
 export async function getCandles(tokenId: string) {
