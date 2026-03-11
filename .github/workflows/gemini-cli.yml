@@ -1,0 +1,26 @@
+name: Gemini CLI Check
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  gemini-cli-tasks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Gemini CLI tasks
+        run: npx @google/gemini-cli --prompt "Run lint, tests, and build"
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
